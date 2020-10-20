@@ -2,8 +2,6 @@
 export all types and interfaces
 */
 
-import React, { useState } from 'react';
-
 // Declare non-importable Dispatch function
 // type Dispatch<A> = A => void;
 
@@ -12,3 +10,12 @@ import React, { useState } from 'react';
 //     state: ,
 //     transactions:
 // }
+
+// export type BasicStateAction<S> = (S => S) | S;
+// export type Dispatch<A> = A => void;
+
+// type Dispatch<A> = (value: A) => void;
+
+// type SetStateAction<S> = S | ((prevState: S) => S);
+
+// type useState = <S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>];

@@ -3,11 +3,15 @@ import {
   assertState,
   testSelectors,
   testSetters,
+  importRecoilFamily,
+  atomFamilyHook,
+  //writeableHook,
+  readableHook,
 } from '../src/output/output-utils.ts';
 
 // testing ternary operator in initializeAtoms helper function
 describe('initializeAtoms', () => {
-  // create mock atomUpdate object, follows AtomUpdate interface 
+  // create mock atomUpdate object, follows AtomUpdate interface
   const atomUpdate = {
     key: 'testAtom',
     value: 2,
@@ -69,6 +73,30 @@ describe('assertState', () => {
   });
 });
 
+describe('importRecoilFamily', () => {
+  const familyObj = {
+    familyName: 'string',
+    atomName: 'test',
+  };
+  it('should return a string with an object as its parameter', () => {
+    expect(typeof importRecoilFamily(familyObj)).toBe('string');
+  });
+});
+
+describe('readableHook', () => {
+  const keyArray = ['one', 'two', 'chromogen'];
+  it('should return a string', () => {
+    expect(typeof readableHook(keyArray)).toBe('string');
+  });
+});
+
+// describe('writeableHook', () => {
+//   const keyArray = ['chromo', 'gen', 'chromogen'];
+//   it('should return a string', () => {
+//     expect(typeof writeableHook(keyArray)).toBe('string');
+//   });
+// });
+
 describe('testSelectors', () => {
   it('should scrub special characters from key names', () => {
     // create instance of invoking testSelectors on mock array that follows the Transaction interface
@@ -110,26 +138,85 @@ describe('testSelectors', () => {
   });
 });
 
+// covers branch test percentage in testSetters
 describe('testSetters', () => {
-  it('should scrub special characters from params', () => {
-    const returnString = testSetters([
-      {
-        state: [
-          {
-            key: 'atom1',
-            value: 1,
-            previous: 0,
-            updated: true,
-          },
-        ],
-        setter: {
-          key: 'selector1',
-          value: 2,
-          params: 'spec!alCh@r',
+  // create mock array with setter object
+  const setTransactionsArrayWithSetter = [
+    {
+      state: [
+        {
+          key: 'atom1',
+          value: 1,
+          previous: 0,
+          updated: true,
         },
+      ],
+      setter: {
+        key: 'selector1',
+        value: 2,
+        params: 'spec!alCh@r',
       },
-    ]);
+    },
+  ];
+  // create mock array without setter object
+  const setTransactionsArrayWithoutSetter = [
+    {
+      state: [
+        {
+          key: 'atom1',
+          value: 1,
+          previous: 0,
+          updated: true,
+        },
+      ],
+    },
+  ];
+  const truthyReturnString = testSetters(setTransactionsArrayWithSetter);
+  const falsyReturnString = testSetters(setTransactionsArrayWithoutSetter);
+
+  it('should scrub special characters from params', () => {
     // verify that if params property's value is a string with special characters, they will be removed
-    expect(returnString).toEqual(expect.not.stringContaining('spec!alCh@r'));
+    expect(truthyReturnString).toEqual(expect.not.stringContaining('spec!alCh@r'));
+  });
+  it('should return a string if an array is passed in', () => {
+    // verify that a string is returned if provided an array with out a setter object
+    expect(typeof falsyReturnString).toBe('string');
+  });
+});
+
+// TEST FOR ATOMFAMILYHOOK lines 70-81
+//create mock transactionArray
+describe('atomFamilyHook', () => {
+  const transactionArray = [
+    {
+      atomFamilyState: [
+        {
+          key: 'spec!alCh@rspec!alCh@r',
+          family: 'familyName',
+          value: 10,
+          updated: true,
+        },
+      ],
+      familyUpdates: [
+        {
+          key: 'familyUpdate1',
+          value: 5,
+          params: 'params',
+        },
+      ],
+    },
+  ]; // truthy
+
+  const transactionArray2 = []; // falsy
+
+  const truthyReturnStr = atomFamilyHook(transactionArray);
+  const falsyReturnStr = atomFamilyHook(transactionArray2);
+
+  it('should scrub special characters', () => {
+    expect(truthyReturnStr).toEqual(expect.not.stringContaining('spec!alCh@r'));
+  });
+
+  it('should return empty string when transactionsArr length is falsy', () => {
+    expect(falsyReturnStr).toBe('');
   });
 });
